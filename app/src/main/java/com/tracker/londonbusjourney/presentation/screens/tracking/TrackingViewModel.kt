@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tracker.londonbusjourney.domain.model.BusPosition
+import com.tracker.londonbusjourney.domain.common.Result
 import com.tracker.londonbusjourney.domain.model.TrackingBusPosition
 import com.tracker.londonbusjourney.domain.model.TrackingRouteStop
 import com.tracker.londonbusjourney.domain.usecase.TrackBusPositionUseCase

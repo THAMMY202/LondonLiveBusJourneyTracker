@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">LondonLiveBusJourneyTracker</string>
+    <string name="app_name">London Bus Tracker</string>
 
     <string name="search_placeholder">Where to?</string>
     <string name="history_header">History</string>
