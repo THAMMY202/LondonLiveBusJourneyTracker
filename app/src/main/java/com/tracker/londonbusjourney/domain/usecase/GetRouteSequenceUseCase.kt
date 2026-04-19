@@ -2,6 +2,7 @@ package com.tracker.londonbusjourney.domain.usecase
 
 import com.tracker.londonbusjourney.domain.model.RouteSequence
 import com.tracker.londonbusjourney.domain.repository.BusRepository
+import com.tracker.londonbusjourney.domain.common.Result
 import javax.inject.Inject
 
 /**

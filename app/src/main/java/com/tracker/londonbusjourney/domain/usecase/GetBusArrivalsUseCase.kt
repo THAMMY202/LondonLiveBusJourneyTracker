@@ -2,7 +2,9 @@ package com.tracker.londonbusjourney.domain.usecase
 
 import com.tracker.londonbusjourney.domain.model.BusArrival
 import com.tracker.londonbusjourney.domain.repository.BusRepository
+import com.tracker.londonbusjourney.domain.common.Result
 import javax.inject.Inject
+import kotlin.compareTo
 
 /**
  * Use case for fetching live bus arrival predictions.
@@ -21,8 +23,7 @@ class GetBusArrivalsUseCase @Inject constructor(
      */
     suspend operator fun invoke(lineId: String): Result<List<BusArrival>> {
         if (lineId.isBlank()) {
-            //return Result.Error("Line ID is required")
-            return Result.failure(IllegalArgumentException("Line ID is required"))
+            return Result.Error("Line ID is required")
         }
 
         return busRepository.getArrivalsForLine(lineId).map { arrivals ->
@@ -34,7 +35,10 @@ class GetBusArrivalsUseCase @Inject constructor(
     }
 
     companion object {
+        /** Only show arrivals within 30 minutes. */
         const val MAX_ARRIVAL_MINUTES = 30
+
+        /** Recommended polling interval. */
         const val POLLING_INTERVAL_MS = 30_000L
     }
 }
