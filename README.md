@@ -24,7 +24,7 @@ A real-time London bus tracking Android app built with Jetpack Compose, Clean Ar
 
 ```bash
 git clone https://github.com/THAMMY202/LondonLiveBusJourneyTracker.git
-cd london-live-bus-journey-tracker
+cd LondonLiveBusJourneyTracker
 ```
 
 ### 2. Configure API Keys
