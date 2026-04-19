@@ -1,4 +1,6 @@
 package com.tracker.londonbusjourney
+import android.app.Application
+import dagger.hilt.android.HiltAndroidApp
 
-class LondonBusTrackerApp {
-}
+@HiltAndroidApp
+class LondonBusTrackerApp : Application()
