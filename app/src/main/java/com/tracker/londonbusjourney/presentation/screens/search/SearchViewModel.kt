@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tracker.londonbusjourney.domain.model.Location
 import com.tracker.londonbusjourney.domain.usecase.SearchLocationsUseCase
+import com.tracker.londonbusjourney.domain.common.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay

@@ -53,7 +53,7 @@ class LandingViewModel @Inject constructor() : ViewModel() {
             )
         )
 
-        // Sample bus stops in central London for map display
+        // mock up bus stops in central London for map display
         val sampleBusStops = listOf(
             LandingBusStop("490000252S", "Victoria Station", 51.4965, -0.1447),
             LandingBusStop("490000173R", "Oxford Circus", 51.5152, -0.1418),

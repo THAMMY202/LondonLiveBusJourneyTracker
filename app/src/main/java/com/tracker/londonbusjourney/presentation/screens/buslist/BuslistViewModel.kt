@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.tracker.londonbusjourney.domain.usecase.GetBusArrivalsUseCase
 import com.tracker.londonbusjourney.domain.usecase.TrackBusPositionUseCase
 import com.tracker.londonbusjourney.presentation.screens.buslist.BusListUiState
+import com.tracker.londonbusjourney.domain.common.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay

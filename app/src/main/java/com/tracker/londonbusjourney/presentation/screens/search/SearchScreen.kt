@@ -76,7 +76,6 @@ fun SearchScreen(
     val fromFocusRequester = remember { FocusRequester() }
     val toFocusRequester = remember { FocusRequester() }
 
-    // Auto-focus the from field on launch
     LaunchedEffect(Unit) {
         fromFocusRequester.requestFocus()
     }
@@ -110,7 +109,7 @@ fun SearchScreen(
                     }
                 )
 
-                Spacer(modifier = height(Spacing.medium))
+                Spacer(modifier = Modifier.height(Spacing.medium))
 
                 // Search input fields
                 Column(modifier = Modifier.padding(horizontal = Spacing.default)) {
@@ -128,7 +127,7 @@ fun SearchScreen(
                         onNext = { toFocusRequester.requestFocus() }
                     )
 
-                    Spacer(modifier = height(Spacing.default))
+                    Spacer(modifier = Modifier.height(Spacing.default))
 
                     FloatingLabelTextField(
                         value = uiState.toText,
@@ -147,7 +146,7 @@ fun SearchScreen(
                     )
                 }
 
-                Spacer(modifier = height(Spacing.large))
+                Spacer(modifier = Modifier.height(Spacing.large))
 
                 // Show loading indicator when searching
                 if (uiState.isSearching) {
@@ -258,7 +257,7 @@ private fun SearchHeader(
             )
         }
 
-        Spacer(modifier = width(Spacing.small))
+        Spacer(modifier = Modifier.width(Spacing.small))
 
         Text(
             text = stringResource(R.string.search_address_title),
@@ -326,10 +325,10 @@ private fun FloatingLabelTextField(
                 }
 
                 if (value.isNotEmpty() && onClear != null) {
-                    Spacer(modifier = width(Spacing.small))
+                    Spacer(modifier = Modifier.width(Spacing.small))
                     IconButton(
                         onClick = onClear,
-                        modifier = size(IconSize.default)
+                        modifier = Modifier.size(IconSize.default)
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_clear),
@@ -382,7 +381,7 @@ private fun SuggestionsSection(
             modifier = Modifier.padding(horizontal = Spacing.default)
         )
 
-        Spacer(modifier = height(Spacing.small))
+        Spacer(modifier = Modifier.height(Spacing.small))
 
         LazyColumn {
             // Use itemsIndexed with index as part of key to ensure uniqueness
@@ -418,11 +417,11 @@ private fun SuggestionItem(
         Icon(
             painter = painterResource(id = R.drawable.ic_location_pin),
             contentDescription = null,
-            modifier = size(IconSize.default),
+            modifier = Modifier.size(IconSize.default),
             tint = BusYellow
         )
 
-        Spacer(modifier = width(Spacing.medium))
+        Spacer(modifier = Modifier.width(Spacing.medium))
 
         Column(modifier = Modifier.weight(1f)) {
             Text(
@@ -464,7 +463,7 @@ private fun RecentSearchesSection(
             modifier = Modifier.padding(horizontal = Spacing.default)
         )
 
-        Spacer(modifier = height(Spacing.small))
+        Spacer(modifier = Modifier.height(Spacing.small))
 
         LazyColumn {
             itemsIndexed(
@@ -499,11 +498,11 @@ private fun RecentSearchItem(
         Icon(
             painter = painterResource(id = R.drawable.ic_location_pin),
             contentDescription = null,
-            modifier = size(IconSize.default),
+            modifier = Modifier.size(IconSize.default),
             tint = TextSecondary
         )
 
-        Spacer(modifier = width(Spacing.medium))
+        Spacer(modifier = Modifier.width(Spacing.medium))
 
         Column(modifier = Modifier.weight(1f)) {
             Text(

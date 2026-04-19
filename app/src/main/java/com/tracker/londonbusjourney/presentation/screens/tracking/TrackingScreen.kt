@@ -228,7 +228,7 @@ private fun TripInfoCard(
             )
         }
 
-        Spacer(modifier = width(Spacing.medium))
+        Spacer(modifier = Modifier.width(Spacing.medium))
 
         TripTimeBadge(minutes = timeToNextStop)
     }

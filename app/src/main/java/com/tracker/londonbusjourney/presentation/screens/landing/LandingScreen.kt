@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -80,7 +81,7 @@ private fun LandingSheetContent(
             modifier = Modifier.padding(horizontal = Spacing.default)
         )
 
-        Spacer(modifier = height(Spacing.large))
+        Spacer(modifier = Modifier.height(Spacing.large))
 
         if (recentSearches.isNotEmpty()) {
             Text(
@@ -91,7 +92,7 @@ private fun LandingSheetContent(
                 modifier = Modifier.padding(horizontal = Spacing.default)
             )
 
-            Spacer(modifier = height(Spacing.small))
+            Spacer(modifier = Modifier.height(Spacing.small))
 
             LazyColumn(
                 contentPadding = PaddingValues(bottom = Spacing.extraLarge)
