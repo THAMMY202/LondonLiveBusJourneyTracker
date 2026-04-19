@@ -1,0 +1,162 @@
+package com.tracker.londonbusjourney.domain.repository
+
+import com.tracker.londonbusjourney.data.mapper.TflMapper
+import com.tracker.londonbusjourney.data.remote.api.TflApiService
+import com.tracker.londonbusjourney.domain.common.Result
+import com.tracker.londonbusjourney.domain.model.BusArrival
+import com.tracker.londonbusjourney.domain.model.BusPosition
+import com.tracker.londonbusjourney.domain.model.RouteSequence
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.withContext
+import javax.inject.Inject
+import javax.inject.Singleton
+
+/**
+ * Implementation of [BusRepository] using TfL API.
+ *
+ * Includes the Virtual GPS algorithm for inferring bus positions
+ * from arrival predictions and route sequence data.
+ *
+ * Caches static data (route sequences) to avoid unnecessary refetching.
+ */
+@Singleton
+class BusRepositoryImpl @Inject constructor(
+    private val apiService: TflApiService,
+    private val mapper: TflMapper,
+    private val ioDispatcher: CoroutineDispatcher
+) : BusRepository {
+
+    /**
+     * In-memory cache for route sequences (static data).
+     * Key format: "lineId_direction" (e.g., "24_inbound")
+     */
+    private val routeSequenceCache = mutableMapOf<String, RouteSequence>()
+
+    /**
+     * Gets live arrival predictions for a bus line.
+     */
+    override suspend fun getArrivalsForLine(lineId: String): Result<List<BusArrival>> {
+        return withContext(ioDispatcher) {
+            try {
+                val response = apiService.getAllLineArrivals(lineId)
+
+                if (response.isSuccessful) {
+                    val body = response.body()
+                    if (body != null) {
+                        val arrivals = mapper.mapToBusArrivals(body)
+                        Result.Success(arrivals)
+                    } else {
+                        Result.Success(emptyList())
+                    }
+                } else {
+                   Result.Error("Failed to get arrivals: ${response.message()}")
+                }
+            } catch (e: Exception) {
+                Result.Error(
+                    message = e.message ?: "Network error",
+                    exception = e
+                )
+            }
+        }
+    }
+
+    /**
+     * Gets the ordered stop sequence for a bus route.
+     * Uses in-memory cache to avoid refetching static data.
+     */
+    override suspend fun getRouteSequence(
+        lineId: String,
+        direction: String
+    ): Result<RouteSequence> {
+        val cacheKey = "${lineId}_${direction}"
+
+        // Return cached data if available
+        routeSequenceCache[cacheKey]?.let { cached ->
+            return Result.Success(cached)
+        }
+
+        return withContext(ioDispatcher) {
+            try {
+                val response = apiService.getRouteSequence(lineId, direction)
+
+                if (response.isSuccessful) {
+                    val body = response.body()
+                    if (body != null) {
+                        val routeSequence = mapper.mapToRouteSequence(body)
+                        if (routeSequence != null) {
+                            // Cache the result for future use
+                            routeSequenceCache[cacheKey] = routeSequence
+                            Result.Success(routeSequence)
+                        } else {
+                            Result.Error("No stops found in route")
+                        }
+                    } else {
+                        Result.Error("Empty response from route sequence")
+                    }
+                } else {
+                    Result.Error("Failed to get route: ${response.message()}")
+                }
+            } catch (e: Exception) {
+                Result.Error(
+                    message = e.message ?: "Network error",
+                    exception = e
+                )
+            }
+        }
+    }
+
+    /**
+     * Infers bus position using Virtual GPS algorithm.
+     *
+     * ## Algorithm
+     * 1. Get arrivals for the line
+     * 2. Find the prediction for our specific vehicle
+     * 3. Match the approaching stop to the route sequence
+     * 4. Use the stop's coordinates as the bus position
+     * 5. Get the next stop for "next stop" display
+     */
+    override suspend fun getBusPosition(
+        vehicleId: String,
+        lineId: String,
+        routeSequence: RouteSequence
+    ): Result<BusPosition> {
+        return withContext(ioDispatcher) {
+            // Get current arrivals
+            val arrivalsResult = getArrivalsForLine(lineId)
+
+            if (arrivalsResult is Result.Error) {
+                return@withContext arrivalsResult
+            }
+
+            val arrivals = (arrivalsResult as Result.Success).data
+
+            // Find the arrival for our vehicle
+            val vehicleArrival = arrivals.find { it.vehicleId == vehicleId }
+
+            if (vehicleArrival == null) {
+                return@withContext Result.Error("Vehicle $vehicleId not found")
+            }
+
+            // Find the stop in our route sequence
+            val currentStop = routeSequence.findStopById(vehicleArrival.naptanId)
+
+            if (currentStop == null) {
+                return@withContext Result.Error("Vehicle not on tracked route")
+            }
+
+            // Get the next stop
+            val nextStop = routeSequence.getNextStop(vehicleArrival.naptanId)
+
+            val position = BusPosition(
+                vehicleId = vehicleId,
+                lat = currentStop.lat,
+                lon = currentStop.lon,
+                currentStopName = currentStop.name,
+                nextStopName = nextStop?.name,
+                timeToNextStopSeconds = vehicleArrival.timeToStationSeconds
+            )
+
+            Result.Success(position)
+        }
+    }
+}
