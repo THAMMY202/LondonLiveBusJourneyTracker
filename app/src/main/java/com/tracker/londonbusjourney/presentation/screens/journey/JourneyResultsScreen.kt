@@ -1,0 +1,206 @@
+package com.tracker.londonbusjourney.presentation.screens.journey
+
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.tracker.londonbusjourney.presentation.screens.journey.JourneyResultsUiState
+import com.tracker.londonbusjourney.presentation.screens.journey.JourneyResultsViewModel
+import com.tracker.londonbusjourney.R
+import com.tracker.londonbusjourney.domain.model.JourneyOption
+import com.tracker.londonbusjourney.presentation.components.DirectionsHeader
+import com.tracker.londonbusjourney.presentation.components.ErrorState
+import com.tracker.londonbusjourney.presentation.components.JourneyOptionCard
+import com.tracker.londonbusjourney.presentation.components.JourneyRouteMap
+import com.tracker.londonbusjourney.presentation.components.LoadingState
+import com.tracker.londonbusjourney.presentation.components.MapBottomSheetScaffold
+import com.tracker.londonbusjourney.ui.theme.LightGray
+import com.tracker.londonbusjourney.ui.theme.Spacing
+import com.tracker.londonbusjourney.ui.theme.TextPrimary
+import com.tracker.londonbusjourney.ui.theme.TextSecondary
+import com.google.android.gms.maps.model.LatLng
+
+@Composable
+fun JourneyResultsScreen(
+    onBackClick: () -> Unit,
+    onRouteSelected: (lineId: String, lineName: String, fromName: String, toName: String) -> Unit,
+    viewModel: JourneyResultsViewModel = hiltViewModel()
+) {
+    val uiState by viewModel.uiState.collectAsState()
+
+    // Convert route path to LatLng list with explicit types
+    val routePathLatLng: List<LatLng> = remember(uiState.routePath) {
+        uiState.routePath.map { pair -> LatLng(pair.first, pair.second) }
+    }
+
+    // Origin position with explicit null handling
+    val originPosition: LatLng? = remember(uiState.originLat, uiState.originLon) {
+        val lat = uiState.originLat
+        val lon = uiState.originLon
+        if (lat != null && lon != null) LatLng(lat, lon) else null
+    }
+
+    // Destination position with explicit null handling
+    val destinationPosition: LatLng? = remember(uiState.destinationLat, uiState.destinationLon) {
+        val lat = uiState.destinationLat
+        val lon = uiState.destinationLon
+        if (lat != null && lon != null) LatLng(lat, lon) else null
+    }
+
+    MapBottomSheetScaffold(
+        sheetPeekHeight = 380.dp,
+        sheetContent = {
+            JourneyResultsSheetContent(
+                uiState = uiState,
+                onRouteSelected = { option: JourneyOption ->
+                    onRouteSelected(
+                        option.lineId,
+                        option.lineName,
+                        uiState.fromName,
+                        uiState.toName
+                    )
+                },
+                onRetry = viewModel::retry
+            )
+        },
+        mapContent = {
+            JourneyRouteMap(
+                originPosition = originPosition,
+                destinationPosition = destinationPosition,
+                originName = uiState.fromName,
+                destinationName = uiState.toName,
+                routePath = routePathLatLng
+            )
+        }
+    )
+}
+
+@Composable
+private fun JourneyResultsSheetContent(
+    uiState: JourneyResultsUiState,
+    onRouteSelected: (JourneyOption) -> Unit,
+    onRetry: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier.fillMaxWidth()) {
+        Text(
+            text = stringResource(R.string.directions),
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+            color = TextPrimary,
+            modifier = Modifier.padding(
+                horizontal = Spacing.default,
+                vertical = Spacing.medium
+            )
+        )
+
+        DirectionsHeader(
+            fromName = uiState.fromName,
+            toName = uiState.toName
+        )
+
+        Spacer(modifier = Modifier.height(Spacing.default))
+
+        HorizontalDivider(color = LightGray, thickness = 1.dp)
+
+        when {
+            uiState.isLoading -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(Spacing.extraLarge)
+                ) {
+                    LoadingState(message = stringResource(R.string.loading))
+                }
+            }
+            uiState.errorMessage != null -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(Spacing.extraLarge)
+                ) {
+                    ErrorState(
+                        message = uiState.errorMessage,
+                        onRetry = onRetry
+                    )
+                }
+            }
+            uiState.journeyOptions.isEmpty() -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(Spacing.extraLarge)
+                ) {
+                    Text(
+                        text = stringResource(R.string.no_routes_found),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = TextSecondary
+                    )
+                }
+            }
+            else -> {
+                JourneyOptionsList(
+                    fromName = uiState.fromName,
+                    toName = uiState.toName,
+                    options = uiState.journeyOptions,
+                    onOptionClick = onRouteSelected
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun JourneyOptionsList(
+    fromName: String,
+    toName: String,
+    options: List<JourneyOption>,
+    onOptionClick: (JourneyOption) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier) {
+        Text(
+            text = "$fromName to $toName",
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.SemiBold,
+            color = TextSecondary,
+            modifier = Modifier.padding(
+                horizontal = Spacing.default,
+                vertical = Spacing.medium
+            )
+        )
+
+        LazyColumn(
+            contentPadding = PaddingValues(bottom = Spacing.extraLarge)
+        ) {
+            items(
+                count = options.size,
+                key = { index -> "${options[index].lineId}_$index" }
+            ) { index ->
+                val option = options[index]
+                JourneyOptionCard(
+                    routeNumber = option.routeNumber,
+                    viaDescription = option.viaDescription,
+                    durationMinutes = option.durationMinutes,
+                    onClick = { onOptionClick(option) }
+                )
+            }
+        }
+    }
+}
