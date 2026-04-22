@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "348366890310",
+    "project_id": "londonbustracker-80606",
+    "storage_bucket": "londonbustracker-80606.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:348366890310:android:0963a2ed2909ee3e0c3147",
+        "android_client_info": {
+          "package_name": "com.tracker.londonbusjourney"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC6_F-d4NZuC5od0WT28qA6vwecgzczgRw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
