@@ -22,10 +22,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.tracker.londonbusjourney" />
+                  <option name="mobileSdkAppId" value="1:348366890310:android:0963a2ed2909ee3e0c3147" />
+                  <option name="projectId" value="londonbustracker-80606" />
+                  <option name="projectNumber" value="348366890310" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
